@@ -1,0 +1,291 @@
+package de.V10lator.RideThaDragon;
+
+import java.util.Random;
+
+import net.minecraft.server.v1_6_R3.EntityFireball;
+import net.minecraft.server.v1_6_R3.EntityLargeFireball;
+
+import org.bukkit.ChatColor;
+import org.bukkit.Chunk;
+import org.bukkit.Location;
+import org.bukkit.Material;
+import org.bukkit.Server;
+import org.bukkit.craftbukkit.v1_6_R3.CraftWorld;
+import org.bukkit.craftbukkit.v1_6_R3.entity.CraftEntity;
+import org.bukkit.craftbukkit.v1_6_R3.entity.CraftLivingEntity;
+import org.bukkit.craftbukkit.v1_6_R3.entity.CraftPlayer;
+import org.bukkit.entity.EnderDragonPart;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.Fireball;
+import org.bukkit.entity.LivingEntity;
+import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
+import org.bukkit.event.Listener;
+import org.bukkit.event.block.Action;
+import org.bukkit.event.entity.EntityExplodeEvent;
+import org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason;
+import org.bukkit.event.player.PlayerInteractEntityEvent;
+import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.event.player.PlayerTeleportEvent;
+import org.bukkit.event.server.PluginEnableEvent;
+import org.bukkit.event.world.ChunkLoadEvent;
+import org.bukkit.event.world.ChunkUnloadEvent;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.util.Vector;
+import org.getspout.spoutapi.player.SpoutPlayer;
+
+import de.V10lator.V10verlap.V10verlap;
+
+class RTDL implements Listener
+{
+  private final RideThaDragon plugin;
+  private final String[] feedAccepted = {
+		  "Nom, nom, nom.",
+		  "Thank you!",
+		  "I'm so happy. :)",
+		  "I love golden apples!",
+		  "That tastes good!"
+  };
+  private final String[] feedDeclined = {
+		  "I'm not hungry.",
+		  "No, thanks.",
+		  "Not a golden apple again...",
+		  "No, no, no.",
+		  "Don't try to give me another apple or I'll bite the hand that feeds me!"
+  };
+  private final Random rand = new Random();
+  
+  RTDL(RideThaDragon plugin)
+  {
+	this.plugin = plugin;
+  }
+  
+  @EventHandler(priority = EventPriority.NORMAL, ignoreCancelled= true)
+  public void onPlayerTeleport(PlayerTeleportEvent event)
+  {
+	Player p = event.getPlayer();
+	String pn = p.getName();
+	if(p.isInsideVehicle() && RideThaDragon.dragons.containsKey(pn) && !plugin.allowTeleport.contains(p))
+	{
+	  Entity pa = RideThaDragon.dragons.get(pn).getPassenger();
+	  if(pa != null && pa.getUniqueId() == p.getUniqueId())
+	  {
+		event.setCancelled(true);
+		p.sendMessage(ChatColor.RED+"Can't teleport while riding a dragon!");
+	  }
+	}
+  }
+  
+  @EventHandler(priority = EventPriority.NORMAL, ignoreCancelled= true)
+  public void onEntityExplode(EntityExplodeEvent event)
+  {
+	if(event.getEntity() instanceof V10Dragon &&
+			plugin.stopGrief.contains(event.getLocation().getWorld().getName()))
+	  event.setCancelled(true);
+  }
+  
+  @EventHandler(priority = EventPriority.MONITOR)
+  public void onPluginLoad(PluginEnableEvent event)
+  {
+	String pl = event.getPlugin().getName();
+	if(!plugin.spout && pl.equals("Spout"))
+	{
+	  Server s = plugin.getServer();
+	  s.getPluginManager().registerEvents(new RTDSL(plugin), plugin);
+	  plugin.spout = true;
+	  for(Player p: s.getOnlinePlayers())
+		plugin.registerTextures((SpoutPlayer)p);
+	}
+	else if(!plugin.v10verlap && pl.equals("V10verlap"))
+	{
+	  double vAPIv = ((V10verlap)event.getPlugin()).getAPI().getVersion();
+	  if(vAPIv < 1.3D)
+		plugin.getServer().getLogger().info("["+plugin.getName()+"] V10verlap API > 1.2 needed (found: "+vAPIv+"), not using!");
+	  else if(vAPIv >= 2.0D)
+		plugin.getServer().getLogger().info("["+plugin.getName()+"] V10verlap API < 2.0 needed (found: "+vAPIv+"), not using!");
+	  else
+	  {
+		plugin.getServer().getPluginManager().registerEvents(new RTDVL(plugin), plugin);
+		plugin.v10verlap = true;
+	  }
+	}
+  }
+  
+  @EventHandler(ignoreCancelled = true)
+  public void dragonInv(PlayerInteractEntityEvent event)
+  {
+	Entity e = event.getRightClicked();
+	if(e instanceof EnderDragonPart)
+	  e = ((EnderDragonPart)e).getParent();
+	if(!(((CraftEntity)e).getHandle() instanceof V10Dragon))
+	  return;
+	event.setCancelled(true);
+	Player p = event.getPlayer();
+	if(!p.hasPermission("ridetha.inv"))
+	  return;
+	String pn = p.getName();
+	boolean notAll = !p.hasPermission("ridetha.allinvs");
+	if(!RideThaDragon.dragons.containsKey(pn) && notAll)
+	  return;
+	LivingEntity ld = RideThaDragon.dragons.get(pn);
+	
+	ItemStack is = p.getItemInHand();
+	Material m = is.getType();
+	if(m != Material.GOLDEN_APPLE) //TODO: Add more...
+	{
+	  if(ld.getUniqueId() != e.getUniqueId() && notAll)
+		return;
+	  p.openInventory(((V10Dragon)((CraftEntity)e).getHandle()).getInventory());
+	  return;
+	}
+	if(ld.getUniqueId() != e.getUniqueId())
+	  return;
+	V10Dragon d = (V10Dragon)((CraftEntity)e).getHandle();
+	if(d.fl >= 1.0D)
+	{
+	  p.sendMessage(ChatColor.BLUE+"Dragon: "+ChatColor.WHITE+feedDeclined[rand.nextInt(feedDeclined.length)]);
+	  return;
+	}
+	int a = is.getAmount();
+	if(--a > 0)
+	  is.setAmount(a);
+	else
+	  is = null;
+	p.setItemInHand(is);
+	d.fl += 0.1D;
+	p.sendMessage(ChatColor.BLUE+"Dragon: "+ChatColor.WHITE+feedAccepted[rand.nextInt(feedAccepted.length)]);
+	SmokeTask st = new SmokeTask(plugin, d);
+	st.setPid(plugin.getServer().getScheduler().scheduleSyncRepeatingTask(plugin, st, 0L, 1L));
+  }
+  
+  @EventHandler(ignoreCancelled = false)
+  public void shoot(PlayerInteractEvent event)
+  {
+	if(event.getAction() != Action.LEFT_CLICK_AIR)
+	  return;
+	Player p = event.getPlayer();
+	if(!p.hasPermission("ridetha.shoot"))
+	  return;
+	String pn = p.getName();
+	if(!RideThaDragon.dragons.containsKey(pn))
+	  return;
+	LivingEntity ld = RideThaDragon.dragons.get(pn);
+	Entity pa = ld.getPassenger();
+	if(pa == null || pa.getUniqueId() != p.getUniqueId())
+	  return;
+	Location loc = ld.getLocation();
+	float yaw = loc.getYaw();
+	
+	if(yaw < 22.5F || yaw > 337.5F)
+	{
+	  loc.setZ(loc.getZ() - 10.0F);
+	}
+	else if(yaw < 67.5F)
+	{
+	  loc.setZ(loc.getZ() - 7.0F);
+	  loc.setX(loc.getX() + 7.0F);
+	}
+	else if(yaw < 112.5F)
+	{
+	  loc.setX(loc.getX() + 10.0F);
+	}
+	else if(yaw < 157.5F)
+	{
+	  loc.setZ(loc.getZ() + 7.0F);
+	  loc.setX(loc.getX() + 7.0F);
+	}
+	else if(yaw < 202.5F)
+	{
+	  loc.setZ(loc.getZ() + 10.0F);
+	}
+	else if(yaw < 247.5F)
+	{
+	  loc.setZ(loc.getZ() + 7.0F);
+	  loc.setX(loc.getX() - 7.0F);
+	}
+	else if(yaw < 292.5)
+	{
+	  loc.setX(loc.getX() - 10.0F);
+	}
+	else
+	{
+	  loc.setZ(loc.getZ() - 7.0F);
+	  loc.setX(loc.getX() - 7.0F);
+	}
+	
+	yaw += 180.0F;
+	while(yaw > 360)
+	  yaw -=360;
+	loc.setYaw(yaw);
+	
+	V10Dragon vd = (V10Dragon)((CraftLivingEntity)ld).getHandle();
+	if(vd.upDown == 1)
+	  loc.setPitch(45.0F);
+	else if(vd.upDown == 2)
+	  loc.setPitch(-45.0F);
+	else
+	  loc.setPitch(0.0F);
+	
+	net.minecraft.server.v1_6_R3.World nw = ((CraftWorld)ld.getWorld()).getHandle();
+	
+	EntityFireball nf = new EntityLargeFireball(nw, ((CraftPlayer)p).getHandle(), loc.getX(), loc.getY(), loc.getZ());
+
+	nw.addEntity(nf, SpawnReason.CUSTOM);
+	Fireball f = (Fireball)nf.getBukkitEntity();
+	f.teleport(loc);
+	double speed = 5.0D;
+	if(!vd.brr)
+	{
+	  speed += plugin.rideSpeed;
+	  speed += vd.fl;
+	}
+	Vector v = loc.getDirection().multiply(speed);
+	f.setDirection(v);
+	f.setVelocity(v);
+  }
+  
+  @EventHandler(ignoreCancelled = true)
+  public void unloader(ChunkUnloadEvent event)
+  {
+	Chunk c = event.getChunk();
+	int x = c.getX();
+	int z = c.getZ();
+	String world = c.getWorld().getName();
+	for(LivingEntity d: RideThaDragon.dragons.values())
+	{
+	  c = d.getLocation().getChunk();
+	  if(c.getWorld().getName().equals(world) &&
+			  c.getX() == x &&
+			  c.getZ() == z)
+	  {
+		d.remove();
+	  }
+	}
+  }
+  @EventHandler(ignoreCancelled = true)
+  public void reloader(ChunkLoadEvent event)
+  {
+	Chunk c = event.getChunk();
+	int x = c.getX();
+	int z = c.getZ();
+	String world = c.getWorld().getName();
+	Location loc;
+	net.minecraft.server.v1_6_R3.World notchWorld;
+	V10Dragon v10dragon;
+	for(LivingEntity d: RideThaDragon.dragons.values())
+	{
+	  loc = d.getLocation();
+	  c = loc.getChunk();
+	  if(c.getWorld().getName().equals(world) &&
+			  c.getX() == x &&
+			  c.getZ() == z)
+	  {
+		notchWorld = ((CraftWorld)loc.getWorld()).getHandle();
+		v10dragon = (V10Dragon)((CraftLivingEntity)d).getHandle();
+		if(!notchWorld.addEntity(v10dragon, SpawnReason.CUSTOM))
+		  plugin.getLogger().info("Can't respawn the dragon of "+v10dragon.player);
+	  }
+	}
+  }
+}

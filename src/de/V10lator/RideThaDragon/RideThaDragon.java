@@ -1,0 +1,461 @@
+package de.V10lator.RideThaDragon;
+
+import java.io.File;
+import java.io.IOException;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.Map.Entry;
+import java.util.logging.Logger;
+
+import net.milkbowl.vault.economy.Economy;
+import net.minecraft.server.v1_6_R3.EntityTypes;
+
+import org.bukkit.Chunk;
+import org.bukkit.Location;
+import org.bukkit.Server;
+import org.bukkit.World;
+import org.bukkit.configuration.Configuration;
+import org.bukkit.configuration.ConfigurationSection;
+import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.craftbukkit.v1_6_R3.CraftWorld;
+import org.bukkit.craftbukkit.v1_6_R3.entity.CraftLivingEntity;
+import org.bukkit.entity.LivingEntity;
+import org.bukkit.entity.Player;
+import org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason;
+import org.bukkit.event.server.PluginEnableEvent;
+import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.plugin.Plugin;
+import org.bukkit.plugin.PluginDescriptionFile;
+import org.bukkit.plugin.PluginManager;
+import org.bukkit.plugin.RegisteredServiceProvider;
+import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.scheduler.BukkitScheduler;
+import org.getspout.spoutapi.player.EntitySkinType;
+import org.getspout.spoutapi.player.SpoutPlayer;
+
+import com.bekvon.bukkit.residence.Residence;
+import com.bekvon.bukkit.residence.protection.ResidenceManager;
+import com.palmergames.bukkit.towny.Towny;
+import com.palmergames.bukkit.towny.object.TownyUniverse;
+import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
+
+import de.V10lator.BananaRegion.BananaRegion;
+import de.V10lator.BananaRegion.BananaRegion_API;
+
+public class RideThaDragon extends JavaPlugin
+{
+	World world;
+	ItemStack[] inv;
+	static YamlConfiguration dcc = new YamlConfiguration();
+	String node;
+	static Server s;
+	static File folder;
+	static Logger log;
+	
+  final static HashMap<String, LivingEntity> dragons = new HashMap<String, LivingEntity>();
+  final HashMap<String, Integer> mh = new HashMap<String, Integer>();
+  private Configuration config;
+  boolean saveChanged = false;
+  WorldGuardPlugin wg;
+  BananaRegion_API bananAPI;
+  ResidenceManager resim;
+  TownyUniverse townyu = null;
+  boolean factions = false;
+  final HashSet<String> stopGrief = new HashSet<String>();
+  double rideSpeed;
+  boolean spout = false;
+  boolean v10verlap = false;
+  final HashSet<Player> allowTeleport = new HashSet<Player>();
+  Economy economy = null;
+  Double price;
+  int lifetime;
+  String dragonTexture;
+  String ownDragonTexture;
+  boolean silence;
+  static boolean allowflightbegin;
+  static boolean allowflightchecked;
+  
+  
+  
+  public void onEnable()
+  {
+	s = getServer();
+	log = getLogger();
+	PluginDescriptionFile pdf = getDescription();
+	config = getConfig();
+	folder = getDataFolder();
+	//try
+	//{
+	//  new AutoUpdate(this);
+	//}
+	//catch(Exception e)
+	//{
+	//  e.printStackTrace();
+	//}
+	ConfigurationSection cs = config.getConfigurationSection("heights");
+	if(cs != null)
+	{
+	  for(String wn: cs.getKeys(false))
+	  {
+		try
+		{
+		  int m = cs.getInt(wn);
+		  World w = s.getWorld(wn);
+		  if(w != null)
+			mh.put(wn, m);
+		  else
+			log.info("World \""+wn+"\" not found! Check your config!");
+		}
+		catch(NumberFormatException e)
+		{
+		  log.info("Invalid max height for world \""+wn+"\"! Check your config!");
+		}
+	  }
+	}
+	config.set("heights", null);
+	PluginManager pm = s.getPluginManager();
+	
+	// Add our new entity to minecrafts entities:
+	try
+	{
+	  Method method = EntityTypes.class.getDeclaredMethod("a", new Class[] {Class.class, String.class, int.class});
+	  method.setAccessible(true);
+	  method.invoke(EntityTypes.class, V10Dragon.class, "V10Dragon", 63);
+	}
+	catch(Exception e)
+	{
+	  log.info("Error registering Entity!");
+	  e.printStackTrace();
+	  pm.disablePlugin(this);
+	  return;
+	}
+	
+	List<?> fp = config.getList("FullProtect");
+	if(fp != null)
+	{
+	  for(Object fpo: fp)
+	  {
+		if(!(fpo instanceof String))
+		  log.info("Invalid entry in the configuration section FullProtect!");
+		else
+		{
+		  String w = (String)fpo;
+		  if(s.getWorld(w) == null)
+			log.info("Couldn't find world in configuraton section FullProtect: "+w);
+		  else
+			stopGrief.add(w);
+		}
+	  }
+	}
+	
+	if(!config.isBoolean("WorldGuard"))
+	  saveChanged = true;
+	if(config.getBoolean("WorldGuard", false))
+	  wg = (WorldGuardPlugin)pm.getPlugin("WorldGuard");
+	else
+	  wg = null;
+	if(!config.isBoolean("BananaRegion"))
+	  saveChanged = true;
+	Plugin pl;
+	if(config.getBoolean("BananaRegion", false))
+	{
+	  pl = pm.getPlugin("BananaRegion");
+	  if(pl != null)
+	    bananAPI = ((BananaRegion)pl).getAPI();
+	  else bananAPI = null;
+	}
+	else
+	  bananAPI = null;
+	if(!config.isBoolean("Residence"))
+	  saveChanged = true;
+	pl = pm.getPlugin("Residence");
+	if(config.getBoolean("Residence", false) && pl != null)
+	  resim = Residence.getResidenceManager();
+	else
+	  resim = null;
+	if(!config.isBoolean("Towny"))
+	  saveChanged = true;
+	if(config.getBoolean("Towny", false))
+	{
+	  pl = pm.getPlugin("Towny");
+	  if(pl != null)
+		townyu = ((Towny)pl).getTownyUniverse();
+	}
+	if(!config.isBoolean("Factions"))
+	  saveChanged = true;
+	if(config.getBoolean("Factions", false))
+	{
+	  pl = pm.getPlugin("Factions");
+	  if(pl != null)
+		factions = true;
+	}
+	if(!config.isDouble("RideSpeed"))
+	  saveChanged = true;
+	rideSpeed = config.getDouble("RideSpeed", 0.6D);
+	if(!config.isDouble("Lifetime"))
+	  saveChanged = true;
+	lifetime = config.getInt("Lifetime", 0);
+	if(!config.isString("dragonTexture"))
+	  saveChanged = true;
+	dragonTexture = config.getString("DragonTexture", "http://www.v10lator.de/RideThaDragonSkin.png");
+	ownDragonTexture = config.getString("OwnDragonTexture", "http://www.v10lator.de/RideThaDragonSkin2.png");
+	if(!config.isBoolean("WorldGuard"))
+	  saveChanged = true;
+	silence = config.getBoolean("Silence", true);
+	if(pm.getPlugin("Vault") == null)
+	{
+	  log.info("Vault not found!");
+	  log.info("Economy support disabled.");
+	}
+	else
+	{
+	  RegisteredServiceProvider<Economy> economyProvider = getServer().getServicesManager().getRegistration(Economy.class);
+	  if(economyProvider != null)
+	  {
+        economy = economyProvider.getProvider();
+        if(!config.isDouble("DragonCost"))
+      	  saveChanged = true;
+      	price = config.getDouble("DragonCost", 25.0D);
+      	if(price < 0.0D)
+      	{
+      	  price = 0.0D;
+      	  saveChanged = true;
+      	}
+	  }
+	  else
+		log.info("Economy support disabled.");
+	}
+	
+	try
+	{
+	  YamlConfiguration dc = new YamlConfiguration();
+	  File sv = new File(getDataFolder(), "dragons.sav");
+	  if(!sv.exists())
+	  {
+		getDataFolder().mkdirs();
+		sv.createNewFile();
+	  }
+	  dc.load(sv);
+	  File invf;
+	  YamlConfiguration invY;
+	  int i;
+	  ItemStack[] inv = null;
+	  Set<String> keys;
+	  World world;
+	  boolean unload;
+	  for(String node: dc.getKeys(false))
+	  {
+		String w = dc.getString(node+".world");
+		world = s.getWorld(w);
+		if(world == null)
+		{
+		  log.info("Can't spawn dragon for player "+node+": World "+w+" not found!");
+		  continue;
+		}
+		Chunk c = new Location(world, dc.getDouble(node+".x"), dc.getDouble(node+".y"), dc.getDouble(node+".z")).getChunk();
+		unload = !c.isLoaded();
+		if(unload)
+		  c.load();
+		
+		invf = new File(getDataFolder(), "invs/"+node+".inv");
+		if(invf.exists())
+		{
+		  invY = new YamlConfiguration();
+		  invY.load(invf);
+		  keys = invY.getKeys(false);
+		  inv = new ItemStack[54];
+		  for(String invN: keys)
+		  {
+		    i = Integer.parseInt(invN);
+		    inv[i] =  invY.getItemStack(invN);
+		  }
+		}
+		
+		V10Dragon d = new V10Dragon(this, node, dc.getDouble(node+".x"), dc.getDouble(node+".y"), dc.getDouble(node+".z"), (float)dc.getDouble(node+".yaw"), world, dc.getInt(node+".lived"), dc.getDouble(node+".food", 0.0D), inv);
+		net.minecraft.server.v1_6_R3.World notchWorld = ((CraftWorld)world).getHandle();
+		if(!notchWorld.addEntity(d, SpawnReason.CUSTOM))
+		  log.info(node+"s dragon can't be spawned!");
+		else
+		  dragons.put(node, (LivingEntity)d.getBukkitEntity());
+	  }
+	}
+	catch(Exception e)
+	{
+	  log.info("Can't read savefile!");
+	  e.printStackTrace();
+	  pm.disablePlugin(this);
+	  return;
+	}
+	
+	RTDL rtdl = new RTDL(this);
+	pl = pm.getPlugin("Spout");
+	if(pl != null)
+	  rtdl.onPluginLoad(new PluginEnableEvent(pl));
+	pl = pm.getPlugin("V10verlap");
+	if(pl != null)
+	  rtdl.onPluginLoad(new PluginEnableEvent(pl));
+	
+	getCommand("dragon").setExecutor(new RTDCE(this));
+	pm.registerEvents(rtdl, this);
+	BukkitScheduler sched = s.getScheduler();
+	sched.scheduleSyncRepeatingTask(this, new AutoSave(), 12000L, 12000L);
+	log.info("v"+pdf.getVersion()+" enabled!");
+	
+	
+  }
+  
+  
+  
+  public void onDisable()
+  {
+	Server s = getServer();
+	s.getScheduler().cancelTasks(this);
+	for(LivingEntity dragon: dragons.values())
+	{
+	  dragon.eject();
+	  dragon.remove();
+	}
+	saveAll();
+  }
+  
+  private class AutoSave implements Runnable
+  {
+	public void run()
+	{
+	  saveAll();
+	}
+  }
+  
+  void killIt(String player)
+  {
+	LivingEntity dragon = dragons.get(player);
+	dragon.eject();
+	dragon.remove();
+	dragons.remove(player);
+	World world = dragon.getWorld();
+	Location loc = dragon.getLocation();
+	for(ItemStack is: ((V10Dragon)((CraftLivingEntity)dragon).getHandle()).getInventory())
+	  if(is != null)
+		world.dropItemNaturally(loc, is);
+  }
+  
+  void saveAll()
+  {
+		YamlConfiguration dc = new YamlConfiguration();
+		File sv = new File(getDataFolder(), "dragons.sav");
+		if(!sv.exists())
+		{
+		  getDataFolder().mkdirs();
+		  try
+		  {
+			sv.createNewFile();
+		  }
+		  catch (IOException e)
+		  {
+			e.printStackTrace();
+		  }
+		}
+		YamlConfiguration invY;
+		File invf = new File(getDataFolder(), "invs");
+		if(!invf.isDirectory())
+		  invf.mkdirs();
+		for(Entry<String, LivingEntity> e: dragons.entrySet())
+		{
+		  String p = e.getKey();
+		  V10Dragon d = (V10Dragon)((CraftLivingEntity)e.getValue()).getHandle();
+		  dc.set(p+".world", d.world.getWorld().getName());
+		  dc.set(p+".x", d.locX);
+		  dc.set(p+".y", d.locY);
+		  dc.set(p+".z", d.locZ);
+		  dc.set(p+".yaw", d.yaw);
+		  dc.set(p+".lived", d.ticksLived);
+		  dc.set(p+".food", d.fl);
+		  try
+		  {
+			invf = new File(getDataFolder(), "invs/"+p+".inv");
+		    if(!invf.exists())
+		      invf.createNewFile();
+		    invY = new YamlConfiguration();
+		    invY.load(invf);
+		    Inventory inv = d.getInventory();
+		    for(int i = 0; i < inv.getSize(); i++)
+		      invY.set(""+i, inv.getItem(i));
+		    invY.save(invf);
+		  }
+		  catch(Exception ex)
+		  {
+			getLogger().info("WARNING: Couldn't save inventory for "+p);
+			ex.printStackTrace();
+		  }
+		}
+		try
+		{
+		  dc.save(sv);
+		}
+		catch (IOException e)
+		{
+		  getLogger().info("WARNING: Couldn't save!");
+		  e.printStackTrace();
+		}
+		if(!saveChanged)
+		  return;
+		for(Entry<String, Integer> e: mh.entrySet())
+		  config.set("heights."+e.getKey(), e.getValue());
+		ArrayList<String> sg = new ArrayList<String>(stopGrief);
+		config.set("FullProtect", sg);
+		config.set("WorldGuard", wg == null ? false : true);
+		config.set("BananaRegion", bananAPI == null ? false : true);
+		config.set("Residence", resim == null ? false : true);
+		config.set("Factions", factions);
+		config.set("Towny", townyu == null ? false : true);
+		config.set("RideSpeed", rideSpeed);
+		config.set("Lifetime", lifetime);
+		if(economy != null)
+		  config.set("DragonCost", price);
+		config.set("DragonTexture", dragonTexture);
+		config.set("OwnDragonTexture", ownDragonTexture);
+		config.set("Silence", silence);
+		saveConfig();
+		config.set("heights", null);
+		saveChanged = false;
+	  }
+  
+  void registerTextures(SpoutPlayer p)
+  {
+	if(!p.isSpoutCraftEnabled())
+	  return;
+	for(Entry<String, LivingEntity> e: dragons.entrySet())
+	{
+	  if(e.getKey().equalsIgnoreCase(p.getName()))
+		p.setEntitySkin(e.getValue(), ownDragonTexture, EntitySkinType.DEFAULT);
+	  else
+		p.setEntitySkin(e.getValue(), dragonTexture, EntitySkinType.DEFAULT);
+	}
+  }
+  
+  void registerTexture(SpoutPlayer p, LivingEntity e, boolean own)
+  {
+	if(!p.isSpoutCraftEnabled())
+	  return;
+	if(own)
+	  p.setEntitySkin(e, ownDragonTexture, EntitySkinType.DEFAULT);
+	else
+	  p.setEntitySkin(e, dragonTexture, EntitySkinType.DEFAULT);
+  }
+
+  
+  
+
+
+	
+	
+
+}	
+
+
+

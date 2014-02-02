@@ -1,0 +1,33 @@
+name: RideThaDragon
+main: de.V10lator.RideThaDragon.RideThaDragon
+version: 5.2.6f2
+softdepend: [WorldGuard, Vault, BananaRegion, Towny, Residence, Factions]
+commands:
+  dragon:
+    description: Ride tha dragon!
+    usage: <command>
+permissions:
+  ridetha.dragon:
+    description: Ride tha dragon!
+    default: true
+  ridetha.admin:
+    description: Configure tha dragons.
+    default: op
+  ridetha.inv:
+    description: Be able to look into your own inventory!
+    default: true
+  ridetha.allinvs:
+    description: Look into everybodys dragon inv!
+    default: op
+  ridetha.locate:
+    description: Locate your dragon.
+    default: true
+  ridetha.shoot:
+    description: Shoot fireballs.
+    default: op
+  ridetha.remove:
+    description: Remove your dragon.
+    default: true
+  ridetha.missing:
+    description: Reload the Dragons.
+    default: op
