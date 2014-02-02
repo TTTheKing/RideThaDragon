@@ -394,15 +394,4 @@ public class V10Dragon extends EntityEnderDragon implements InventoryHolder
 	return true;
   }
   
-  @Override
-  public String r()
-  {
-	return plugin.silence ? null : super.r();
-  }
-
-  @Override
-  public String aO()
-  {
-	return plugin.silence ? null : super.aO();
-  }
 }

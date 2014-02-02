@@ -9,7 +9,6 @@ import org.bukkit.ChatColor;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.Server;
 import org.bukkit.craftbukkit.v1_7_R1.CraftWorld;
 import org.bukkit.craftbukkit.v1_7_R1.entity.CraftEntity;
 import org.bukkit.craftbukkit.v1_7_R1.entity.CraftLivingEntity;
@@ -28,14 +27,10 @@ import org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerTeleportEvent;
-import org.bukkit.event.server.PluginEnableEvent;
 import org.bukkit.event.world.ChunkLoadEvent;
 import org.bukkit.event.world.ChunkUnloadEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.Vector;
-
-import de.V10lator.V10verlap.V10verlap;
-import java.util.logging.Level;
 
 class RTDL implements Listener
 {
@@ -84,27 +79,7 @@ class RTDL implements Listener
 			plugin.stopGrief.contains(event.getLocation().getWorld().getName()))
 	  event.setCancelled(true);
   }
-  
-  @EventHandler(priority = EventPriority.MONITOR)
-  public void onPluginLoad(PluginEnableEvent event)
-  {
-	String pl = event.getPlugin().getName();
 
-	if(!plugin.v10verlap && pl.equals("V10verlap"))
-	{
-	  double vAPIv = ((V10verlap)event.getPlugin()).getAPI().getVersion();
-	  if(vAPIv < 1.3D)
-		plugin.getServer().getLogger().log(Level.INFO, "[{0}] V10verlap API > 1.2 needed (found: {1}), not using!", new Object[]{plugin.getName(), vAPIv});
-	  else if(vAPIv >= 2.0D)
-		plugin.getServer().getLogger().log(Level.INFO, "[{0}] V10verlap API < 2.0 needed (found: {1}), not using!", new Object[]{plugin.getName(), vAPIv});
-	  else
-	  {
-		plugin.getServer().getPluginManager().registerEvents(new RTDVL(plugin), plugin);
-		plugin.v10verlap = true;
-	  }
-	}
-  }
-  
   @EventHandler(ignoreCancelled = true)
   public void dragonInv(PlayerInteractEntityEvent event)
   {

@@ -37,6 +37,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitScheduler;
 
 import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
+import java.lang.reflect.InvocationTargetException;
 import java.util.logging.Level;
 import org.bukkit.configuration.InvalidConfigurationException;
 
@@ -73,6 +74,7 @@ public class RideThaDragon extends JavaPlugin
   
   
   
+    @Override
   public void onEnable()
   {
 	s = getServer();
@@ -80,14 +82,7 @@ public class RideThaDragon extends JavaPlugin
 	PluginDescriptionFile pdf = getDescription();
 	config = getConfig();
 	folder = getDataFolder();
-	//try
-	//{
-	//  new AutoUpdate(this);
-	//}
-	//catch(Exception e)
-	//{
-	//  e.printStackTrace();
-	//}
+
 	ConfigurationSection cs = config.getConfigurationSection("heights");
 	if(cs != null)
 	{
@@ -100,11 +95,11 @@ public class RideThaDragon extends JavaPlugin
 		  if(w != null)
 			mh.put(wn, m);
 		  else
-			log.info("World \""+wn+"\" not found! Check your config!");
+			log.log(Level.INFO, "World \"{0}\" not found! Check your config!", wn);
 		}
 		catch(NumberFormatException e)
 		{
-		  log.info("Invalid max height for world \""+wn+"\"! Check your config!");
+		  log.log(Level.INFO, "Invalid max height for world \"{0}\"! Check your config!", wn);
 		}
 	  }
 	}
@@ -116,9 +111,9 @@ public class RideThaDragon extends JavaPlugin
 	{
 	  Method method = EntityTypes.class.getDeclaredMethod("a", new Class[] {Class.class, String.class, int.class});
 	  method.setAccessible(true);
-	  method.invoke(EntityTypes.class, V10Dragon.class, "V10Dragon", 63);
+	  method.invoke(EntityTypes.class, V10Dragon.class, "V10Dragon", 163);
 	}
-	catch(Exception e)
+	catch(IllegalAccessException | IllegalArgumentException | NoSuchMethodException | SecurityException | InvocationTargetException e)
 	{
 	  log.info("Error registering Entity!");
 	  e.printStackTrace();
@@ -250,9 +245,6 @@ public class RideThaDragon extends JavaPlugin
 	}
 	
 	RTDL rtdl = new RTDL(this);
-	Plugin pl = pm.getPlugin("V10verlap");
-	if(pl != null)
-	  rtdl.onPluginLoad(new PluginEnableEvent(pl));
 	
 	getCommand("dragon").setExecutor(new RTDCE(this));
 	pm.registerEvents(rtdl, this);
