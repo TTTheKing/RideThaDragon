@@ -293,19 +293,6 @@ public class V10Dragon extends EntityEnderDragon implements InventoryHolder
 			return;
 	  }
 	  
-	  if(plugin.bananAPI != null && plugin.bananAPI.isRegion(b))
-	    return;
-	  
-	  if(plugin.resim != null && plugin.resim.getByLoc(loc) != null)
-		return;
-	  
-	  if(plugin.townyu != null && b != null)
-		for(TownBlock tb: plugin.townyu.getAllTownBlocks())
-		  if(tb.getX() == b.getX() && tb.getZ() == b.getZ())
-			return;
-	  
-	  if(plugin.factions && Board.getFactionAt(new FLocation(loc)) != null)
-		return;
 	}
 	
 	this.setPosition(myX, myY , myZ);
@@ -357,11 +344,11 @@ public class V10Dragon extends EntityEnderDragon implements InventoryHolder
 	float f11 = MathHelper.sin(f10);
 	float f12 = MathHelper.cos(f10);
 
-	this.bv.l_();
+	this.bv.L();
 	this.bv.setPositionRotation(this.locX + (double) (f11 * 0.5F), this.locY, this.locZ - (double) (f12 * 0.5F), 0.0F, 0.0F);
-	this.bw.l_();
+	this.bw.L();
 	this.bw.setPositionRotation(this.locX + (double) (f12 * 4.5F), this.locY + 2.0D, this.locZ + (double) (f11 * 4.5F), 0.0F, 0.0F);
-	this.bq.l_();
+	this.bq.L();
 	this.bq.setPositionRotation(this.locX - (double) (f12 * 4.5F), this.locY + 2.0D, this.locZ - (double) (f11 * 4.5F), 0.0F, 0.0F);
 	
 	double[] adouble = this.b(5, 1.0F);
@@ -369,7 +356,7 @@ public class V10Dragon extends EntityEnderDragon implements InventoryHolder
 	float f3 = MathHelper.sin(this.yaw * 3.1415927F / 180.0F - this.aw * 0.01F);
 	float f13 = MathHelper.cos(this.yaw * 3.1415927F / 180.0F - this.aw * 0.01F);
 	
-	this.bs.l_();
+	this.bs.L();
 	this.bs.setPositionRotation(this.locX + (double) (f3 * 5.5F * f2), this.locY + (adouble1[1] - adouble[1]) * 1.0D + (double) (f9 * 5.5F), this.locZ - (double) (f13 * 5.5F * f2), 0.0F, 0.0F);
 	
 	for (int j = 0; j < 3; ++j) {
@@ -394,7 +381,7 @@ public class V10Dragon extends EntityEnderDragon implements InventoryHolder
 	  float f17 = 1.5F;
 	  float f18 = (float) (j + 1) * 2.0F;
 	  
-	  entitycomplexpart.l_();
+	  entitycomplexpart.L();
 	  entitycomplexpart.setPositionRotation(this.locX - (double) ((f11 * f17 + f15 * f18) * f2), this.locY + (adouble2[1] - adouble[1]) * 1.0D - (double) ((f18 + f17) * f9) + 1.5D, this.locZ + (double) ((f12 * f17 + f16 * f18) * f2), 0.0F, 0.0F);
 	}
 

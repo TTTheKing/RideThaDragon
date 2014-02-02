@@ -2,18 +2,18 @@ package de.V10lator.RideThaDragon;
 
 import java.util.Random;
 
-import net.minecraft.server.v1_6_R3.EntityFireball;
-import net.minecraft.server.v1_6_R3.EntityLargeFireball;
+import net.minecraft.server.v1_7_R1.EntityFireball;
+import net.minecraft.server.v1_7_R1.EntityLargeFireball;
 
 import org.bukkit.ChatColor;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Server;
-import org.bukkit.craftbukkit.v1_6_R3.CraftWorld;
-import org.bukkit.craftbukkit.v1_6_R3.entity.CraftEntity;
-import org.bukkit.craftbukkit.v1_6_R3.entity.CraftLivingEntity;
-import org.bukkit.craftbukkit.v1_6_R3.entity.CraftPlayer;
+import org.bukkit.craftbukkit.v1_7_R1.CraftWorld;
+import org.bukkit.craftbukkit.v1_7_R1.entity.CraftEntity;
+import org.bukkit.craftbukkit.v1_7_R1.entity.CraftLivingEntity;
+import org.bukkit.craftbukkit.v1_7_R1.entity.CraftPlayer;
 import org.bukkit.entity.EnderDragonPart;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Fireball;
@@ -33,9 +33,9 @@ import org.bukkit.event.world.ChunkLoadEvent;
 import org.bukkit.event.world.ChunkUnloadEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.Vector;
-import org.getspout.spoutapi.player.SpoutPlayer;
 
 import de.V10lator.V10verlap.V10verlap;
+import java.util.logging.Level;
 
 class RTDL implements Listener
 {
@@ -89,21 +89,14 @@ class RTDL implements Listener
   public void onPluginLoad(PluginEnableEvent event)
   {
 	String pl = event.getPlugin().getName();
-	if(!plugin.spout && pl.equals("Spout"))
-	{
-	  Server s = plugin.getServer();
-	  s.getPluginManager().registerEvents(new RTDSL(plugin), plugin);
-	  plugin.spout = true;
-	  for(Player p: s.getOnlinePlayers())
-		plugin.registerTextures((SpoutPlayer)p);
-	}
-	else if(!plugin.v10verlap && pl.equals("V10verlap"))
+
+	if(!plugin.v10verlap && pl.equals("V10verlap"))
 	{
 	  double vAPIv = ((V10verlap)event.getPlugin()).getAPI().getVersion();
 	  if(vAPIv < 1.3D)
-		plugin.getServer().getLogger().info("["+plugin.getName()+"] V10verlap API > 1.2 needed (found: "+vAPIv+"), not using!");
+		plugin.getServer().getLogger().log(Level.INFO, "[{0}] V10verlap API > 1.2 needed (found: {1}), not using!", new Object[]{plugin.getName(), vAPIv});
 	  else if(vAPIv >= 2.0D)
-		plugin.getServer().getLogger().info("["+plugin.getName()+"] V10verlap API < 2.0 needed (found: "+vAPIv+"), not using!");
+		plugin.getServer().getLogger().log(Level.INFO, "[{0}] V10verlap API < 2.0 needed (found: {1}), not using!", new Object[]{plugin.getName(), vAPIv});
 	  else
 	  {
 		plugin.getServer().getPluginManager().registerEvents(new RTDVL(plugin), plugin);
@@ -227,7 +220,7 @@ class RTDL implements Listener
 	else
 	  loc.setPitch(0.0F);
 	
-	net.minecraft.server.v1_6_R3.World nw = ((CraftWorld)ld.getWorld()).getHandle();
+	net.minecraft.server.v1_7_R1.World nw = ((CraftWorld)ld.getWorld()).getHandle();
 	
 	EntityFireball nf = new EntityLargeFireball(nw, ((CraftPlayer)p).getHandle(), loc.getX(), loc.getY(), loc.getZ());
 
@@ -271,7 +264,7 @@ class RTDL implements Listener
 	int z = c.getZ();
 	String world = c.getWorld().getName();
 	Location loc;
-	net.minecraft.server.v1_6_R3.World notchWorld;
+	net.minecraft.server.v1_7_R1.World notchWorld;
 	V10Dragon v10dragon;
 	for(LivingEntity d: RideThaDragon.dragons.values())
 	{

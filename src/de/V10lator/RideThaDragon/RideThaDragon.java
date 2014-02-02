@@ -12,7 +12,7 @@ import java.util.Map.Entry;
 import java.util.logging.Logger;
 
 import net.milkbowl.vault.economy.Economy;
-import net.minecraft.server.v1_6_R3.EntityTypes;
+import net.minecraft.server.v1_7_R1.EntityTypes;
 
 import org.bukkit.Chunk;
 import org.bukkit.Location;
@@ -21,8 +21,8 @@ import org.bukkit.World;
 import org.bukkit.configuration.Configuration;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
-import org.bukkit.craftbukkit.v1_6_R3.CraftWorld;
-import org.bukkit.craftbukkit.v1_6_R3.entity.CraftLivingEntity;
+import org.bukkit.craftbukkit.v1_7_R1.CraftWorld;
+import org.bukkit.craftbukkit.v1_7_R1.entity.CraftLivingEntity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason;
@@ -35,17 +35,11 @@ import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitScheduler;
-import org.getspout.spoutapi.player.EntitySkinType;
-import org.getspout.spoutapi.player.SpoutPlayer;
 
-import com.bekvon.bukkit.residence.Residence;
-import com.bekvon.bukkit.residence.protection.ResidenceManager;
-import com.palmergames.bukkit.towny.Towny;
-import com.palmergames.bukkit.towny.object.TownyUniverse;
 import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
+import java.util.logging.Level;
+import org.bukkit.configuration.InvalidConfigurationException;
 
-import de.V10lator.BananaRegion.BananaRegion;
-import de.V10lator.BananaRegion.BananaRegion_API;
 
 public class RideThaDragon extends JavaPlugin
 {
@@ -62,9 +56,6 @@ public class RideThaDragon extends JavaPlugin
   private Configuration config;
   boolean saveChanged = false;
   WorldGuardPlugin wg;
-  BananaRegion_API bananAPI;
-  ResidenceManager resim;
-  TownyUniverse townyu = null;
   boolean factions = false;
   final HashSet<String> stopGrief = new HashSet<String>();
   double rideSpeed;
@@ -159,41 +150,7 @@ public class RideThaDragon extends JavaPlugin
 	  wg = (WorldGuardPlugin)pm.getPlugin("WorldGuard");
 	else
 	  wg = null;
-	if(!config.isBoolean("BananaRegion"))
-	  saveChanged = true;
-	Plugin pl;
-	if(config.getBoolean("BananaRegion", false))
-	{
-	  pl = pm.getPlugin("BananaRegion");
-	  if(pl != null)
-	    bananAPI = ((BananaRegion)pl).getAPI();
-	  else bananAPI = null;
-	}
-	else
-	  bananAPI = null;
-	if(!config.isBoolean("Residence"))
-	  saveChanged = true;
-	pl = pm.getPlugin("Residence");
-	if(config.getBoolean("Residence", false) && pl != null)
-	  resim = Residence.getResidenceManager();
-	else
-	  resim = null;
-	if(!config.isBoolean("Towny"))
-	  saveChanged = true;
-	if(config.getBoolean("Towny", false))
-	{
-	  pl = pm.getPlugin("Towny");
-	  if(pl != null)
-		townyu = ((Towny)pl).getTownyUniverse();
-	}
-	if(!config.isBoolean("Factions"))
-	  saveChanged = true;
-	if(config.getBoolean("Factions", false))
-	{
-	  pl = pm.getPlugin("Factions");
-	  if(pl != null)
-		factions = true;
-	}
+        
 	if(!config.isDouble("RideSpeed"))
 	  saveChanged = true;
 	rideSpeed = config.getDouble("RideSpeed", 0.6D);
@@ -277,14 +234,14 @@ public class RideThaDragon extends JavaPlugin
 		}
 		
 		V10Dragon d = new V10Dragon(this, node, dc.getDouble(node+".x"), dc.getDouble(node+".y"), dc.getDouble(node+".z"), (float)dc.getDouble(node+".yaw"), world, dc.getInt(node+".lived"), dc.getDouble(node+".food", 0.0D), inv);
-		net.minecraft.server.v1_6_R3.World notchWorld = ((CraftWorld)world).getHandle();
+		net.minecraft.server.v1_7_R1.World notchWorld = ((CraftWorld)world).getHandle();
 		if(!notchWorld.addEntity(d, SpawnReason.CUSTOM))
 		  log.info(node+"s dragon can't be spawned!");
 		else
 		  dragons.put(node, (LivingEntity)d.getBukkitEntity());
 	  }
 	}
-	catch(Exception e)
+	catch(IOException | NumberFormatException | InvalidConfigurationException e)
 	{
 	  log.info("Can't read savefile!");
 	  e.printStackTrace();
@@ -293,10 +250,7 @@ public class RideThaDragon extends JavaPlugin
 	}
 	
 	RTDL rtdl = new RTDL(this);
-	pl = pm.getPlugin("Spout");
-	if(pl != null)
-	  rtdl.onPluginLoad(new PluginEnableEvent(pl));
-	pl = pm.getPlugin("V10verlap");
+	Plugin pl = pm.getPlugin("V10verlap");
 	if(pl != null)
 	  rtdl.onPluginLoad(new PluginEnableEvent(pl));
 	
@@ -304,7 +258,7 @@ public class RideThaDragon extends JavaPlugin
 	pm.registerEvents(rtdl, this);
 	BukkitScheduler sched = s.getScheduler();
 	sched.scheduleSyncRepeatingTask(this, new AutoSave(), 12000L, 12000L);
-	log.info("v"+pdf.getVersion()+" enabled!");
+	log.log(Level.INFO, "v{0} enabled!", pdf.getVersion());
 	
 	
   }
@@ -406,13 +360,10 @@ public class RideThaDragon extends JavaPlugin
 		  return;
 		for(Entry<String, Integer> e: mh.entrySet())
 		  config.set("heights."+e.getKey(), e.getValue());
-		ArrayList<String> sg = new ArrayList<String>(stopGrief);
+		ArrayList<String> sg = new ArrayList<>(stopGrief);
 		config.set("FullProtect", sg);
-		config.set("WorldGuard", wg == null ? false : true);
-		config.set("BananaRegion", bananAPI == null ? false : true);
-		config.set("Residence", resim == null ? false : true);
+		config.set("WorldGuard", (wg != null));
 		config.set("Factions", factions);
-		config.set("Towny", townyu == null ? false : true);
 		config.set("RideSpeed", rideSpeed);
 		config.set("Lifetime", lifetime);
 		if(economy != null)
@@ -424,36 +375,6 @@ public class RideThaDragon extends JavaPlugin
 		config.set("heights", null);
 		saveChanged = false;
 	  }
-  
-  void registerTextures(SpoutPlayer p)
-  {
-	if(!p.isSpoutCraftEnabled())
-	  return;
-	for(Entry<String, LivingEntity> e: dragons.entrySet())
-	{
-	  if(e.getKey().equalsIgnoreCase(p.getName()))
-		p.setEntitySkin(e.getValue(), ownDragonTexture, EntitySkinType.DEFAULT);
-	  else
-		p.setEntitySkin(e.getValue(), dragonTexture, EntitySkinType.DEFAULT);
-	}
-  }
-  
-  void registerTexture(SpoutPlayer p, LivingEntity e, boolean own)
-  {
-	if(!p.isSpoutCraftEnabled())
-	  return;
-	if(own)
-	  p.setEntitySkin(e, ownDragonTexture, EntitySkinType.DEFAULT);
-	else
-	  p.setEntitySkin(e, dragonTexture, EntitySkinType.DEFAULT);
-  }
-
-  
-  
-
-
-	
-	
 
 }	
 
