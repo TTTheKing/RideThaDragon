@@ -6,7 +6,7 @@ import java.util.Set;
 
 
 import net.milkbowl.vault.economy.Economy;
-import net.minecraft.server.v1_6_R3.EntityEnderDragon;
+import net.minecraft.server.EntityEnderDragon;
 
 
 import org.bukkit.ChatColor;
