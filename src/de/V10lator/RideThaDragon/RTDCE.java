@@ -6,7 +6,7 @@ import java.util.Set;
 
 
 import net.milkbowl.vault.economy.Economy;
-import net.minecraft.server.EntityEnderDragon;
+import net.minecraft.server.v1_7_R1.EntityEnderDragon;
 
 
 import org.bukkit.ChatColor;
@@ -21,8 +21,8 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.YamlConfiguration;
-import org.bukkit.craftbukkit.v1_6_R3.CraftWorld;
-import org.bukkit.craftbukkit.v1_6_R3.entity.CraftEnderDragon;
+import org.bukkit.craftbukkit.v1_7_R1.CraftWorld;
+import org.bukkit.craftbukkit.v1_7_R1.entity.CraftEnderDragon;
 import org.bukkit.entity.ComplexEntityPart;
 import org.bukkit.entity.EnderDragon;
 import org.bukkit.entity.Entity;
@@ -35,21 +35,12 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.RegisteredServiceProvider;
 
-import org.getspout.spoutapi.player.SpoutPlayer;
-
-import com.bekvon.bukkit.residence.Residence;
-import com.massivecraft.factions.Board;
-import com.massivecraft.factions.FLocation;
-import com.massivecraft.factions.P;
-
-import com.palmergames.bukkit.towny.Towny;
-import com.palmergames.bukkit.towny.object.TownBlock;
 import com.sk89q.worldedit.Vector;
 import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
 import com.sk89q.worldguard.protection.managers.RegionManager;
 import com.sk89q.worldguard.protection.regions.ProtectedRegion;
-
-import de.V10lator.BananaRegion.BananaRegion;
+import java.io.IOException;
+import org.bukkit.configuration.InvalidConfigurationException;
 
 class RTDCE implements CommandExecutor
 { 
@@ -66,7 +57,7 @@ boolean allowflightcurrent;
 	this.plugin = plugin;
   }
   
-  @SuppressWarnings({ })
+@Override
 public boolean onCommand(CommandSender sender, Command command,
 			String label, String[] args)
   
@@ -124,11 +115,6 @@ public boolean onCommand(CommandSender sender, Command command,
 			sender.sendMessage(ChatColor.RED+"You dragon is to far away!");
 		  else
 		  {
-			boolean spout = plugin.spout;
-			if(spout &&
-					!((SpoutPlayer)sender).isSpoutCraftEnabled())
-			   spout = false;
-			d.spout = spout;
 		    d.getBukkitEntity().setPassenger(player);
 		  }
 		}
@@ -213,20 +199,7 @@ public boolean onCommand(CommandSender sender, Command command,
 			break;
 		  }
 		}
-		if(plugin.bananAPI != null && plugin.bananAPI.isRegion(b))
-		  loc.setY(loc.getWorld().getMaxHeight() + 1);
-		if(plugin.resim != null && plugin.resim.getByLoc(loc) != null)
-		  loc.setY(loc.getWorld().getMaxHeight() + 1);
-		if(plugin.townyu != null && b != null)
-		  for(TownBlock tb: plugin.townyu.getAllTownBlocks())
-			if(tb.getX() == b.getX() && tb.getZ() == b.getZ())
-			{
-			  loc.setY(loc.getWorld().getMaxHeight() + 1);
-			  break;
-			}
-		if(plugin.factions && Board.getFactionAt(new FLocation(loc)) != null)
-		  loc.setY(loc.getWorld().getMaxHeight() + 1);
-		net.minecraft.server.v1_6_R3.World notchWorld = ((CraftWorld) loc.getWorld()).getHandle();
+		net.minecraft.server.v1_7_R1.World notchWorld = ((CraftWorld) loc.getWorld()).getHandle();
 		
 		V10Dragon v10dragon = new V10Dragon(plugin, player, loc, notchWorld);
 		if(!notchWorld.addEntity(v10dragon, SpawnReason.CUSTOM))
@@ -239,10 +212,7 @@ public boolean onCommand(CommandSender sender, Command command,
 		  plugin.economy.withdrawPlayer(pn, plugin.price);
 		LivingEntity dragon = (LivingEntity)v10dragon.getBukkitEntity();
 		RideThaDragon.dragons.put(pn, dragon);
-		
-		if(plugin.spout)
-		  for(Player p: plugin.getServer().getOnlinePlayers())
-			plugin.registerTexture((SpoutPlayer)p, dragon, pn.equalsIgnoreCase(p.getName()));
+
 		dragon.setPassenger(player);
 		player.setAllowFlight(true);
 		
@@ -379,13 +349,13 @@ public boolean onCommand(CommandSender sender, Command command,
 			}
 			
 			V10Dragon d = new V10Dragon(plugin, node, dcc.getDouble(node+".x"), dcc.getDouble(node+".y"), dcc.getDouble(node+".z"), (float)dcc.getDouble(node+".yaw"), world, dcc.getInt(node+".lived"), dcc.getDouble(node+".food", 0.0D), inv);
-			net.minecraft.server.v1_6_R3.World notchWorld = ((CraftWorld)world).getHandle();
+			net.minecraft.server.v1_7_R1.World notchWorld = ((CraftWorld)world).getHandle();
 			if(!notchWorld.addEntity(d, SpawnReason.CUSTOM))
 			  p.sendMessage("Fehler beim respawnen...");
 			else
 			  RideThaDragon.dragons.put(node, (LivingEntity)d.getBukkitEntity());
 			p.sendMessage("Dragons were reloaded...");}}
-			catch(Exception e)
+			catch(IOException | NumberFormatException | InvalidConfigurationException e)
 			{
 				
 			  p.sendMessage("Error, can't reload the sav file...");

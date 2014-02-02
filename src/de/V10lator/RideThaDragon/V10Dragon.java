@@ -6,25 +6,23 @@ import org.bukkit.Server;
 import org.bukkit.block.Block;
 
 
-import org.bukkit.craftbukkit.v1_6_R3.CraftWorld;
+import org.bukkit.craftbukkit.v1_7_R1.CraftWorld;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 
-import com.massivecraft.factions.Board;
-import com.massivecraft.factions.FLocation;
-import com.palmergames.bukkit.towny.object.TownBlock;
 import com.sk89q.worldedit.Vector;
 import com.sk89q.worldguard.protection.regions.ProtectedRegion;
 
 import static com.sk89q.worldguard.bukkit.BukkitUtil.toVector;
 
-import net.minecraft.server.v1_6_R3.DamageSource;
-import net.minecraft.server.v1_6_R3.EntityComplexPart;
-import net.minecraft.server.v1_6_R3.EntityEnderDragon;
-import net.minecraft.server.v1_6_R3.MathHelper;
-import net.minecraft.server.v1_6_R3.World;
+import net.minecraft.server.v1_7_R1.DamageSource;
+import net.minecraft.server.v1_7_R1.EntityComplexPart;
+import net.minecraft.server.v1_7_R1.EntityEnderDragon;
+import net.minecraft.server.v1_7_R1.MathHelper;
+import net.minecraft.server.v1_7_R1.World;
+
 public class V10Dragon extends EntityEnderDragon implements InventoryHolder
 {
   private RideThaDragon plugin;
