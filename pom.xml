@@ -101,6 +101,5 @@
   </build>
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <bukkit.version>1.6.4-R2.0</bukkit.version>
   </properties>
 </project>
