@@ -13,11 +13,6 @@
       <url>http://repo.bukkit.org/content/groups/public/</url>
     </repository>
     
-    <repository>
-        <id>sk89q-repo</id>
-        <url>http://maven.sk89q.com/repo/</url>
-    </repository>
-    
   </repositories>
   
     <dependencies>
@@ -57,10 +52,11 @@
         <dependency>
             <groupId>com.sk89q</groupId>
             <artifactId>worldguard</artifactId>
-            <version>5.8-SNAPSHOT</version>
-            <type>jar</type>
-            <scope>compile</scope>
+            <scope>system</scope>
+            <version>5.8</version>
+            <systemPath>${basedir}/lib/WorldGuard.jar</systemPath>
         </dependency>
+        
   </dependencies>
   
   <build>
