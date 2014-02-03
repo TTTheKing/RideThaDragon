@@ -57,6 +57,14 @@
             <systemPath>${basedir}/lib/WorldGuard.jar</systemPath>
         </dependency>
         
+        <dependency>
+            <groupId>com.sk89q</groupId>
+            <artifactId>worldedit</artifactId>
+            <scope>system</scope>
+            <version>5.5.8</version>
+            <systemPath>${basedir}/lib/WorldEdit.jar</systemPath>
+        </dependency>       
+         
   </dependencies>
   
   <build>
