@@ -37,6 +37,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitScheduler;
 
 import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
+import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.util.logging.Level;
 import org.bukkit.configuration.InvalidConfigurationException;
@@ -107,20 +108,21 @@ public class RideThaDragon extends JavaPlugin
 	PluginManager pm = s.getPluginManager();
 	
 	// Add our new entity to minecrafts entities:
-	try
-	{
-	  Method method = EntityTypes.class.getDeclaredMethod("a", new Class[] {Class.class, String.class, int.class});
-	  method.setAccessible(true);
-	  method.invoke(EntityTypes.class, V10Dragon.class, "V10Dragon", 163);
-	}
-	catch(IllegalAccessException | IllegalArgumentException | NoSuchMethodException | SecurityException | InvocationTargetException e)
-	{
-	  log.info("Error registering Entity!");
-	  e.printStackTrace();
-	  pm.disablePlugin(this);
-	  return;
-	}
-	
+//	try
+//	{
+//	  Method method = EntityTypes.class.getDeclaredMethod("a", new Class[] {Class.class, String.class, int.class});
+//	  method.setAccessible(true);
+//	  method.invoke(EntityTypes.class, V10Dragon.class, "V10Dragon", 163);
+//	}
+//	catch(IllegalAccessException | IllegalArgumentException | NoSuchMethodException | SecurityException | InvocationTargetException e)
+//	{
+//	  log.info("Error registering Entity!");
+//	  e.printStackTrace();
+//	  pm.disablePlugin(this);
+//	  return;
+//	}
+	registerEntity();
+        
 	List<?> fp = config.getList("FullProtect");
 	if(fp != null)
 	{
@@ -255,8 +257,45 @@ public class RideThaDragon extends JavaPlugin
 	
   }
   
-  
-  
+  	private boolean registerEntity() {
+    
+        try {        
+            Class entityTypeClass = EntityTypes.class;
+            
+            Field c = entityTypeClass.getDeclaredField("c");
+            c.setAccessible(true);
+            HashMap c_map = (HashMap)c.get(null);
+            c_map.put("V10Dragon", V10Dragon.class);
+
+            Field d = entityTypeClass.getDeclaredField("d");
+            d.setAccessible(true);
+            HashMap d_map = (HashMap)d.get(null);
+            d_map.put(V10Dragon.class, "V10Dragon");
+
+            Field e = entityTypeClass.getDeclaredField("e");
+            e.setAccessible(true);
+            HashMap e_map = (HashMap)e.get(null);
+            e_map.put(Integer.valueOf(63), V10Dragon.class);
+
+            Field f = entityTypeClass.getDeclaredField("f");
+            f.setAccessible(true);
+            HashMap f_map = (HashMap)f.get(null);
+            f_map.put(V10Dragon.class, Integer.valueOf(63));
+
+            Field g = entityTypeClass.getDeclaredField("g");
+            g.setAccessible(true);
+            HashMap g_map = (HashMap)g.get(null);
+            g_map.put("V10Dragon", Integer.valueOf(63));
+            
+            return true;
+        }catch (NoSuchFieldException | SecurityException | IllegalArgumentException | IllegalAccessException ex) {
+            log.info("Error registering Entity!");
+	  ex.printStackTrace();
+//	  pm.disablePlugin(this);
+                return false;
+        }    
+    }
+        
   public void onDisable()
   {
 	Server s = getServer();
