@@ -1,5 +1,8 @@
-package de.V10lator.RideThaDragon;
+package de.V10lator.RideThaDragon.listener;
 
+import de.V10lator.RideThaDragon.RideThaDragon;
+import de.V10lator.RideThaDragon.SmokeTask;
+import de.V10lator.RideThaDragon.model.V10Dragon;
 import java.util.Random;
 
 import net.minecraft.server.v1_7_R1.EntityFireball;
@@ -32,7 +35,7 @@ import org.bukkit.event.world.ChunkUnloadEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.Vector;
 
-class RTDL implements Listener
+public class PlayerListener implements Listener
 {
   private final RideThaDragon plugin;
   private final String[] feedAccepted = {
@@ -51,7 +54,7 @@ class RTDL implements Listener
   };
   private final Random rand = new Random();
   
-  RTDL(RideThaDragon plugin)
+  public PlayerListener(RideThaDragon plugin)
   {
 	this.plugin = plugin;
   }
@@ -75,8 +78,7 @@ class RTDL implements Listener
   @EventHandler(priority = EventPriority.NORMAL, ignoreCancelled= true)
   public void onEntityExplode(EntityExplodeEvent event)
   {
-	if(event.getEntity() instanceof V10Dragon &&
-			plugin.stopGrief.contains(event.getLocation().getWorld().getName()))
+	if(event.getEntity() instanceof V10Dragon && plugin.stopGrief.contains(event.getLocation().getWorld().getName()))
 	  event.setCancelled(true);
   }
 
@@ -104,7 +106,6 @@ class RTDL implements Listener
 	{
 	  if(ld.getUniqueId() != e.getUniqueId() && notAll)
 		return;
-	  p.openInventory(((V10Dragon)((CraftEntity)e).getHandle()).getInventory());
 	  return;
 	}
 	if(ld.getUniqueId() != e.getUniqueId())
@@ -123,6 +124,7 @@ class RTDL implements Listener
 	p.setItemInHand(is);
 	d.fl += 0.1D;
 	p.sendMessage(ChatColor.BLUE+"Dragon: "+ChatColor.WHITE+feedAccepted[rand.nextInt(feedAccepted.length)]);
+        
 	SmokeTask st = new SmokeTask(plugin, d);
 	st.setPid(plugin.getServer().getScheduler().scheduleSyncRepeatingTask(plugin, st, 0L, 1L));
   }

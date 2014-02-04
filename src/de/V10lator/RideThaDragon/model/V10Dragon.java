@@ -1,4 +1,4 @@
-package de.V10lator.RideThaDragon;
+package de.V10lator.RideThaDragon.model;
 
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -8,15 +8,13 @@ import org.bukkit.block.Block;
 import org.bukkit.craftbukkit.v1_7_R1.CraftWorld;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
-import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 
 import com.sk89q.worldedit.Vector;
 import com.sk89q.worldguard.protection.regions.ProtectedRegion;
 
 import static com.sk89q.worldguard.bukkit.BukkitUtil.toVector;
-import net.minecraft.server.GenericAttributes;
-import net.minecraft.server.Vec3D;
+import de.V10lator.RideThaDragon.RideThaDragon;
 
 import net.minecraft.server.v1_7_R1.DamageSource;
 import net.minecraft.server.v1_7_R1.EntityComplexPart;
@@ -25,21 +23,19 @@ import net.minecraft.server.v1_7_R1.World;
 
 public class V10Dragon extends EntityEnderDragon{
 
-    private RideThaDragon plugin;
-    final String player;
+    private final RideThaDragon plugin;
+    public final String player;
     private boolean onGround = false;
     private final short[] counter = {0, 0, 0};
     private boolean directionChanged = false;
-    boolean spout;
-    byte upDown = 0;
-    boolean brr = true;
-    boolean ignoreFlying = false;
-    private Inventory virtInv;
-    boolean dragonfly = false;
-    double fl = 0.0D;
-    Server s = (RideThaDragon.s);
+    public boolean spout;
+    public byte upDown = 0;
+    public boolean brr = true;
+    public boolean ignoreFlying = false;
+    public boolean dragonfly = false;
+    public double fl = 0.0D;
 
-    V10Dragon(RideThaDragon plugin, Player player, Location loc, World world) {
+    public V10Dragon(RideThaDragon plugin, Player player, Location loc, World world) {
         super(world);
         this.plugin = plugin;
         this.player = player.getName();
@@ -62,7 +58,7 @@ public class V10Dragon extends EntityEnderDragon{
         }
     }
 
-    V10Dragon(RideThaDragon drrr, String player, double x, double y, double z, float yaw, org.bukkit.World world, int lived, double fl, ItemStack[] inv) {
+    public V10Dragon(RideThaDragon drrr, String player, double x, double y, double z, float yaw, org.bukkit.World world, int lived, double fl, ItemStack[] inv) {
         super(((CraftWorld) world).getHandle());
         this.plugin = drrr;
         this.player = player;
@@ -78,7 +74,6 @@ public class V10Dragon extends EntityEnderDragon{
         plugin = null;
         player = null;
         spout = false;
-        virtInv = null;
         getBukkitEntity().remove();
     }
 
@@ -112,36 +107,35 @@ public class V10Dragon extends EntityEnderDragon{
             return;
         }
 
-        if (!spout) {
-            if (ignoreFlying) {
-                if (++counter[1] > 10) {
-                    counter[1] = 0;
-                    ignoreFlying = true;
-                }
-            } //experimentell
-            else if (p.isSneaking()) {
-                p.setAllowFlight(RideThaDragon.allowflightbegin);
-            } else if (p.isFlying()) {
-                if (dragonfly == false) {
-                    dragonfly = true;
-                    ignoreFlying = true;
-                    p.setFlying(false);
-                    ignoreFlying = false;
-                } else {
-                    ignoreFlying = true;
-                    dragonfly = false;
-                    p.setFlying(false);
-                    ignoreFlying = false;
 
-                }
+        if (ignoreFlying) {
+            if (++counter[1] > 10) {
+                counter[1] = 0;
+                ignoreFlying = true;
+            }
+        } //experimentell
+        else if (p.isSneaking()) {
+            p.setAllowFlight(RideThaDragon.allowflightbegin);
+        } else if (p.isFlying()) {
+            if (dragonfly == false) {
+                dragonfly = true;
+                ignoreFlying = true;
+                p.setFlying(false);
+                ignoreFlying = false;
+            } else {
+                ignoreFlying = true;
+                dragonfly = false;
+                p.setFlying(false);
+                ignoreFlying = false;
+
             }
         }
+
         if (!dragonfly) {
             return;
         }
 
         if (fl > 0.0D) {
-            //if(counter[2] > 600)
             if (counter[2] > 200) {
                 fl -= 0.1D;
                 counter[2] = 0;
@@ -200,7 +194,6 @@ public class V10Dragon extends EntityEnderDragon{
             }
 
             if (directionChanged) {
-                //if(counter[0] < 60)
                 if (counter[0] < 20) {
                     counter[0]++;
                 } else {

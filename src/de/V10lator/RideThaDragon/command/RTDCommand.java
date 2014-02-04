@@ -1,4 +1,4 @@
-package de.V10lator.RideThaDragon;
+package de.V10lator.RideThaDragon.command;
 
 import java.io.File;
 import java.util.Iterator;
@@ -37,16 +37,18 @@ import com.sk89q.worldedit.Vector;
 import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
 import com.sk89q.worldguard.protection.managers.RegionManager;
 import com.sk89q.worldguard.protection.regions.ProtectedRegion;
+import de.V10lator.RideThaDragon.RideThaDragon;
+import de.V10lator.RideThaDragon.model.V10Dragon;
 import java.io.IOException;
 import org.bukkit.configuration.InvalidConfigurationException;
 
-class RTDCE implements CommandExecutor {
+public class RTDCommand implements CommandExecutor {
 
     boolean allowflightcurrent;
 
     private final RideThaDragon plugin;
 
-    RTDCE(RideThaDragon plugin) {
+    public RTDCommand(RideThaDragon plugin) {
         this.plugin = plugin;
     }
 
@@ -107,13 +109,7 @@ class RTDCE implements CommandExecutor {
                     player.teleport(loc);
                     player.setAllowFlight(RideThaDragon.allowflightbegin);
                     RideThaDragon.allowflightchecked = false;
-//		  if(RideThaDragon.allowflightbegin == false)
-//		   {
-//		   player.setAllowFlight(false);
-//		   RideThaDragon.flightchecked = false;
-//		   //player.sendMessage("Flug deaktiviert");
-//		   }
-                    //TODO: 
+                    
                     Iterator<ComplexEntityPart> pi = ((EnderDragon) ld).getParts().iterator();
                     pi.next();
                     ComplexEntityPart b = pi.next();
@@ -276,7 +272,7 @@ class RTDCE implements CommandExecutor {
                 boolean unload;
                 for (String node : dcc.getKeys(false)) {
                     String w = dcc.getString(node + ".world");
-                    world = RideThaDragon.s.getWorld(w);
+                    world = RideThaDragon.server.getWorld(w);
 
                     if (world == null) {
 
@@ -566,21 +562,7 @@ class RTDCE implements CommandExecutor {
                     sender.sendMessage(ChatColor.RED + "Invalid lifetime: " + args[1]);
                     return true;
                 }
-            } else if (args[0].equalsIgnoreCase("texture")) {
-                if (args.length < 2) {
-                    return false;
-                }
-                plugin.dragonTexture = args[1];
-                sender.sendMessage(ChatColor.GREEN + "New texture: " + args[1]);
-            } else if (args[0].equalsIgnoreCase("owntexture")) {
-                if (args.length < 2) {
-                    return false;
-                }
-                plugin.ownDragonTexture = args[1];
-                sender.sendMessage(ChatColor.GREEN + "New texture: " + args[1]);
-            } else {
-                return false;
-            }
+            } 
         } else {
             sender.sendMessage(ChatColor.RED + "You don't have permissions to use this command!");
         }

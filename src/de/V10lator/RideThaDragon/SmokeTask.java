@@ -1,5 +1,6 @@
 package de.V10lator.RideThaDragon;
 
+import de.V10lator.RideThaDragon.model.V10Dragon;
 import org.bukkit.Effect;
 import org.bukkit.Location;
 import org.bukkit.World;
@@ -11,17 +12,18 @@ public class SmokeTask implements Runnable
   int pid;
   short c = 0;
   
-  SmokeTask(RideThaDragon plugin, V10Dragon d)
+  public SmokeTask(RideThaDragon plugin, V10Dragon d)
   {
 	this.plugin = plugin;
 	this.d = d;
   }
 	
-  void setPid(int pid)
+  public void setPid(int pid)
   {
 	this.pid = pid;
   }
   
+  @Override
   public void run()
   {
 	World w = d.world.getWorld();
