@@ -38,21 +38,6 @@ import org.bukkit.util.Vector;
 public class PlayerListener implements Listener
 {
   private final RideThaDragon plugin;
-  private final String[] feedAccepted = {
-		  "Nom, nom, nom.",
-		  "Thank you!",
-		  "I'm so happy. :)",
-		  "I love golden apples!",
-		  "That tastes good!"
-  };
-  private final String[] feedDeclined = {
-		  "I'm not hungry.",
-		  "No, thanks.",
-		  "Not a golden apple again...",
-		  "No, no, no.",
-		  "Don't try to give me another apple or I'll bite the hand that feeds me!"
-  };
-  private final Random rand = new Random();
   
   public PlayerListener(RideThaDragon plugin)
   {
@@ -80,53 +65,6 @@ public class PlayerListener implements Listener
   {
 	if(event.getEntity() instanceof V10Dragon && plugin.stopGrief.contains(event.getLocation().getWorld().getName()))
 	  event.setCancelled(true);
-  }
-
-  @EventHandler(ignoreCancelled = true)
-  public void dragonInv(PlayerInteractEntityEvent event)
-  {
-	Entity e = event.getRightClicked();
-	if(e instanceof EnderDragonPart)
-	  e = ((EnderDragonPart)e).getParent();
-	if(!(((CraftEntity)e).getHandle() instanceof V10Dragon))
-	  return;
-	event.setCancelled(true);
-	Player p = event.getPlayer();
-	if(!p.hasPermission("ridetha.inv"))
-	  return;
-	String pn = p.getName();
-	boolean notAll = !p.hasPermission("ridetha.allinvs");
-	if(!RideThaDragon.dragons.containsKey(pn) && notAll)
-	  return;
-	LivingEntity ld = RideThaDragon.dragons.get(pn);
-	
-	ItemStack is = p.getItemInHand();
-	Material m = is.getType();
-	if(m != Material.GOLDEN_APPLE) //TODO: Add more...
-	{
-	  if(ld.getUniqueId() != e.getUniqueId() && notAll)
-		return;
-	  return;
-	}
-	if(ld.getUniqueId() != e.getUniqueId())
-	  return;
-	V10Dragon d = (V10Dragon)((CraftEntity)e).getHandle();
-	if(d.fl >= 1.0D)
-	{
-	  p.sendMessage(ChatColor.BLUE+"Dragon: "+ChatColor.WHITE+feedDeclined[rand.nextInt(feedDeclined.length)]);
-	  return;
-	}
-	int a = is.getAmount();
-	if(--a > 0)
-	  is.setAmount(a);
-	else
-	  is = null;
-	p.setItemInHand(is);
-	d.fl += 0.1D;
-	p.sendMessage(ChatColor.BLUE+"Dragon: "+ChatColor.WHITE+feedAccepted[rand.nextInt(feedAccepted.length)]);
-        
-	SmokeTask st = new SmokeTask(plugin, d);
-	st.setPid(plugin.getServer().getScheduler().scheduleSyncRepeatingTask(plugin, st, 0L, 1L));
   }
   
   @EventHandler(ignoreCancelled = false)

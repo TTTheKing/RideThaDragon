@@ -2,12 +2,10 @@ package de.V10lator.RideThaDragon.model;
 
 import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.Server;
 import org.bukkit.block.Block;
 
 import org.bukkit.craftbukkit.v1_7_R1.CraftWorld;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
 import com.sk89q.worldedit.Vector;
@@ -269,6 +267,11 @@ public class V10Dragon extends EntityEnderDragon{
         return false;
     }
 
+    @Override
+    public int getExpReward() {
+        return 0;
+    } 
+    
     public boolean a(EntityComplexPart entitycomplexpart, DamageSource damagesource, int i) {
         return false;
     }

@@ -16,9 +16,13 @@ import org.bukkit.command.CommandSender;
  */
 public abstract class CommandHandler extends Util {   
 
+    public final String MsgHr;
+    
     public CommandHandler(RideThaDragon plugin) {
         super(plugin);
+        this.MsgHr = "&e-----------------------------------------------------";
     }
     
     protected abstract Boolean OnCommand(CommandSender sender, String[] args);
+    protected abstract Boolean isInvalid(CommandSender sender, String[] args);
 }
