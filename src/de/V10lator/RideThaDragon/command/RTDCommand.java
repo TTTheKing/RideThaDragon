@@ -383,19 +383,6 @@ public class RTDCommand implements CommandExecutor {
                 } catch (NumberFormatException e) {
                     sender.sendMessage(ChatColor.RED + args[1] + " is no valid speed!");
                 }
-            } else if (args[0].equalsIgnoreCase("WorldGuard")) {
-                if (plugin.wg == null) {
-                    plugin.wg = (WorldGuardPlugin) plugin.getServer().getPluginManager().getPlugin("WorldGuard");
-                    if (plugin.wg == null) {
-                        sender.sendMessage(ChatColor.RED + "WorldGuard not found!");
-                    } else {
-                        sender.sendMessage(ChatColor.GREEN + "WorldGuard support enabled!");
-                    }
-                } else {
-                    plugin.wg = null;
-                    sender.sendMessage(ChatColor.GOLD + "WorldGuard support disabled!");
-                }
-                plugin.saveChanged = true;
             } else if (args[0].equalsIgnoreCase("cost")) {
                 if (args.length < 2) {
                     return false;

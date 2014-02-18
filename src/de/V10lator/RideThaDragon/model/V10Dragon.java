@@ -249,15 +249,6 @@ public class V10Dragon extends EntityEnderDragon{
                 return;
             }
             Vector v;
-            if (plugin.wg != null) {
-                v = toVector(loc);
-                for (ProtectedRegion pr : plugin.wg.getRegionManager(w).getApplicableRegions(toVector(loc))) {
-                    if (pr.contains(v)) {
-                        return;
-                    }
-                }
-            }
-
         }
 
         this.setPosition(myX, myY, myZ);

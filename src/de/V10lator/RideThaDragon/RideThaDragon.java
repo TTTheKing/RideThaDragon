@@ -54,7 +54,6 @@ public class RideThaDragon extends JavaPlugin {
     public final HashMap<String, Integer> mh = new HashMap<>();
     private Configuration config;
     public boolean saveChanged = false;
-    public WorldGuardPlugin wg;
     boolean factions = false;
     public final HashSet<String> stopGrief = new HashSet<>();
     public double rideSpeed;
@@ -110,15 +109,6 @@ public class RideThaDragon extends JavaPlugin {
                     }
                 }
             }
-        }
-
-        if (!config.isBoolean("WorldGuard")) {
-            saveChanged = true;
-        }
-        if (config.getBoolean("WorldGuard", false)) {
-            wg = (WorldGuardPlugin) pm.getPlugin("WorldGuard");
-        } else {
-            wg = null;
         }
 
         if (!config.isDouble("RideSpeed")) {
@@ -321,7 +311,6 @@ public class RideThaDragon extends JavaPlugin {
         }
         ArrayList<String> sg = new ArrayList<>(stopGrief);
         config.set("FullProtect", sg);
-        config.set("WorldGuard", (wg != null));
         config.set("Factions", factions);
         config.set("RideSpeed", rideSpeed);
         config.set("Lifetime", lifetime);
