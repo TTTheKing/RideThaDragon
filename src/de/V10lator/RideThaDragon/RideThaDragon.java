@@ -32,8 +32,8 @@ import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitScheduler;
 
-import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
 import de.V10lator.RideThaDragon.command.RTDCommand;
+import de.V10lator.RideThaDragon.listener.EnderSpawnListener;
 import de.V10lator.RideThaDragon.listener.PlayerListener;
 import de.V10lator.RideThaDragon.model.V10Dragon;
 import java.lang.reflect.Field;
@@ -63,8 +63,6 @@ public class RideThaDragon extends JavaPlugin {
     public Double price;
     public int lifetime;
     public boolean silence;
-    public static boolean allowflightbegin;
-    public static boolean allowflightchecked;
 
     @Override
     public void onEnable() {
@@ -202,9 +200,11 @@ public class RideThaDragon extends JavaPlugin {
         }
 
         PlayerListener playerListener = new PlayerListener(this);
-
+        EnderSpawnListener enderSpawnListener = new EnderSpawnListener(this);
         getCommand("dragon").setExecutor(new RTDCommand(this));
         pm.registerEvents(playerListener, this);
+        pm.registerEvents(enderSpawnListener, this);
+        
         BukkitScheduler sched = server.getScheduler();
         sched.scheduleSyncRepeatingTask(this, new AutoSave(), 12000L, 12000L);
         log.log(Level.INFO, "v{0} enabled!", pdf.getVersion());

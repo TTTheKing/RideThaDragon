@@ -17,31 +17,21 @@
 package de.V10lator.RideThaDragon.listener;
 
 import de.V10lator.RideThaDragon.RideThaDragon;
-import java.sql.Timestamp;
+import de.V10lator.RideThaDragon.model.V10Dragon;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 import org.bukkit.block.BlockState;
-import org.bukkit.Chunk;
-import org.bukkit.entity.EnderDragon;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
-import org.bukkit.entity.Player;
 import org.bukkit.event.block.BlockFromToEvent;
 import org.bukkit.event.entity.EntityCreatePortalEvent;
-import org.bukkit.event.entity.EntityDeathEvent;
-import org.bukkit.event.entity.EntityExplodeEvent;
-import org.bukkit.event.player.PlayerChangedWorldEvent;
-import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
-import org.bukkit.event.world.ChunkUnloadEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.Location;
 import org.bukkit.PortalType;
-import org.bukkit.World;
 
 public class EnderSpawnListener implements Listener {
 
@@ -56,7 +46,6 @@ public class EnderSpawnListener implements Listener {
         if (event.getBlock().getType().getId() != 122) {
             return;
         }
-
         event.setCancelled(true);
     }
 
@@ -64,7 +53,7 @@ public class EnderSpawnListener implements Listener {
     public void onEntityCreatePortal(EntityCreatePortalEvent event) {
         Entity entity = event.getEntity();
 
-        if (!(entity instanceof EnderDragon)) {
+        if (!(entity instanceof V10Dragon)) {
             return;
         }
 

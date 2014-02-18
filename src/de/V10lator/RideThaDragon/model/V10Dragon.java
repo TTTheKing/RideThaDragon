@@ -111,9 +111,8 @@ public class V10Dragon extends EntityEnderDragon{
                 counter[1] = 0;
                 ignoreFlying = true;
             }
-        } //experimentell
-        else if (p.isSneaking()) {
-            p.setAllowFlight(RideThaDragon.allowflightbegin);
+        } else if (p.isSneaking()) {
+            p.setAllowFlight(false);
         } else if (p.isFlying()) {
             if (dragonfly == false) {
                 dragonfly = true;
@@ -248,7 +247,6 @@ public class V10Dragon extends EntityEnderDragon{
             if (plugin.stopGrief.contains(wn) && b != null && b.getType() != Material.AIR && !b.isLiquid()) {
                 return;
             }
-            Vector v;
         }
 
         this.setPosition(myX, myY, myZ);
