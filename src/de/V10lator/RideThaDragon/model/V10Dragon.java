@@ -7,13 +7,7 @@ import org.bukkit.block.Block;
 import org.bukkit.craftbukkit.v1_7_R1.CraftWorld;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
-
-import com.sk89q.worldedit.Vector;
-import com.sk89q.worldguard.protection.regions.ProtectedRegion;
-
-import static com.sk89q.worldguard.bukkit.BukkitUtil.toVector;
 import de.V10lator.RideThaDragon.RideThaDragon;
-
 import net.minecraft.server.v1_7_R1.DamageSource;
 import net.minecraft.server.v1_7_R1.EntityComplexPart;
 import net.minecraft.server.v1_7_R1.EntityEnderDragon;

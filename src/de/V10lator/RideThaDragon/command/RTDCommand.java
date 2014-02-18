@@ -33,10 +33,6 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.RegisteredServiceProvider;
 
-import com.sk89q.worldedit.Vector;
-import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
-import com.sk89q.worldguard.protection.managers.RegionManager;
-import com.sk89q.worldguard.protection.regions.ProtectedRegion;
 import de.V10lator.RideThaDragon.RideThaDragon;
 import de.V10lator.RideThaDragon.model.V10Dragon;
 import java.io.IOException;
@@ -426,10 +422,5 @@ public class RTDCommand implements CommandExecutor {
             sender.sendMessage(ChatColor.RED + "You don't have permissions to use this command!");
         }
         return true;
-    }
-
-    private Vector toVector(Location loc) {
-        // TODO Auto-generated method stub
-        return null;
     }
 }

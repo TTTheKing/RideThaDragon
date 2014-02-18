@@ -47,17 +47,25 @@ public class PlayerListener implements Listener
   @EventHandler(priority = EventPriority.NORMAL, ignoreCancelled= true)
   public void onPlayerTeleport(PlayerTeleportEvent event)
   {
-	Player p = event.getPlayer();
-	String pn = p.getName();
-	if(p.isInsideVehicle() && RideThaDragon.dragons.containsKey(pn) && !plugin.allowTeleport.contains(p))
-	{
-	  Entity pa = RideThaDragon.dragons.get(pn).getPassenger();
-	  if(pa != null && pa.getUniqueId() == p.getUniqueId())
-	  {
-		event.setCancelled(true);
-		p.sendMessage(ChatColor.RED+"Can't teleport while riding a dragon!");
-	  }
-	}
+    Player player = event.getPlayer();
+    String playerName = player.getName();
+    if(NeedCheckPlayerTeleport(player, playerName))
+    {
+      Entity passenger = RideThaDragon.dragons.get(playerName).getPassenger();
+      if(isThatPlayerPassenger(passenger, player))
+      {
+        event.setCancelled(true);
+        player.sendMessage(ChatColor.RED +"[!] Can't teleport while riding a dragon!");
+      }
+    }
+  }
+  
+  private boolean NeedCheckPlayerTeleport(Player player,String playerName) {
+      return player.isInsideVehicle() && RideThaDragon.dragons.containsKey(playerName) && !plugin.allowTeleport.contains(player);
+  }
+  
+  private boolean isThatPlayerPassenger(Entity passenger,Player player) {
+      return passenger != null && passenger.getUniqueId() == player.getUniqueId();
   }
   
   @EventHandler(priority = EventPriority.NORMAL, ignoreCancelled= true)

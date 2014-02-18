@@ -6,9 +6,6 @@
 
 package de.V10lator.RideThaDragon.command;
 
-import com.sk89q.worldedit.Vector;
-import com.sk89q.worldguard.protection.managers.RegionManager;
-import com.sk89q.worldguard.protection.regions.ProtectedRegion;
 import de.V10lator.RideThaDragon.RideThaDragon;
 import de.V10lator.RideThaDragon.model.V10Dragon;
 import java.util.Iterator;
@@ -117,10 +114,10 @@ public class Dragon extends CommandHandler {
           if (plugin.economy != null) {
               plugin.economy.withdrawPlayer(playerName, plugin.price);
           }
-          LivingEntity dragon = (LivingEntity) v10dragon.getBukkitEntity();
-          RideThaDragon.dragons.put(playerName, dragon);
+          LivingEntity v10Dragon = (LivingEntity) v10dragon.getBukkitEntity();
+          RideThaDragon.dragons.put(playerName, v10Dragon);
 
-          dragon.setPassenger(player);
+          v10Dragon.setPassenger(player);
           player.setAllowFlight(true);
     }
     
