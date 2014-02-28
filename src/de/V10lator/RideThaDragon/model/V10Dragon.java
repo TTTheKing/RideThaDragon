@@ -23,7 +23,6 @@ public class V10Dragon extends EntityEnderDragon{
     public boolean spout;
     public byte upDown = 0;
     public boolean brr = true;
-    public boolean ignoreFlying = false;
     public boolean dragonfly = false;
     public double fl = 0.0D;
 
@@ -100,26 +99,11 @@ public class V10Dragon extends EntityEnderDragon{
         }
 
 
-        if (ignoreFlying) {
-            if (++counter[1] > 10) {
-                counter[1] = 0;
-                ignoreFlying = true;
-            }
-        } else if (p.isSneaking()) {
+        if (p.isSneaking()) {
             p.setAllowFlight(false);
         } else if (p.isFlying()) {
-            if (dragonfly == false) {
-                dragonfly = true;
-                ignoreFlying = true;
-                p.setFlying(false);
-                ignoreFlying = false;
-            } else {
-                ignoreFlying = true;
-                dragonfly = false;
-                p.setFlying(false);
-                ignoreFlying = false;
-
-            }
+            dragonfly = dragonfly == false;
+            p.setFlying(false);
         }
 
         if (!dragonfly) {
