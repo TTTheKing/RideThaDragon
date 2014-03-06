@@ -32,6 +32,8 @@ import org.bukkit.event.Listener;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.Location;
 import org.bukkit.PortalType;
+import org.bukkit.event.entity.EntityDeathEvent;
+import org.bukkit.event.entity.EntityExplodeEvent;
 
 public class EnderSpawnListener implements Listener {
 
@@ -48,54 +50,32 @@ public class EnderSpawnListener implements Listener {
         }
         event.setCancelled(true);
     }
+    
+    @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
+    public void onEntityExplode(EntityExplodeEvent event) {
+        if (!(event.getEntity() instanceof V10Dragon)) {
+            return;
+        }
 
+        event.blockList().clear();
+    }
+    
     @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
     public void onEntityCreatePortal(EntityCreatePortalEvent event) {
         Entity entity = event.getEntity();
 
-        if (!(entity instanceof V10Dragon)) {
-            return;
-        }
-
-        List<BlockState> blocks = new ArrayList(event.getBlocks());
-
-        for (BlockState block : event.getBlocks()) {
-            if (block.getType().getId() == 122) {
-                blocks.remove(block);
-            }
-
-
-            if (block.getType().getId() == 7 || block.getType().getId() == 119) {
-                blocks.remove(block);
-            } else if (block.getType().getId() == 0 || block.getType().getId() == 50) {
-                blocks.remove(block);
-            } else if (block.getType().getId() == 122) {
-                blocks.remove(block);
-
-                Location location = entity.getLocation();
-                ItemStack item = new ItemStack(block.getType());
-
-                entity.getWorld().dropItemNaturally(location, item);
-            }
-        }
-
-        if (blocks.size() != event.getBlocks().size()) {
+        if (entity instanceof V10Dragon) {
             event.setCancelled(true);
-
-            LivingEntity newEntity = (LivingEntity) entity;
-            PortalType type = event.getPortalType();
-            EntityCreatePortalEvent newEvent;
-            newEvent = new EntityCreatePortalEvent(newEntity, blocks, type);
-
-            plugin.getServer().getPluginManager().callEvent(newEvent);
-
-            if (!newEvent.isCancelled()) {
-                for (BlockState blockState : blocks) {
-                    int id = blockState.getTypeId();
-                    byte data = blockState.getRawData();
-                    blockState.getBlock().setTypeIdAndData(id, data, false);
-                }
-            }
         }
+    }
+
+    @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
+    public void onEntityDeath(EntityDeathEvent event) {
+        Entity entity = event.getEntity();
+        int droppedEXP = event.getDroppedExp();
+        
+        if (!(entity instanceof V10Dragon) || droppedEXP <= 0) return;
+   
+        event.setDroppedExp(0);
     }
 }

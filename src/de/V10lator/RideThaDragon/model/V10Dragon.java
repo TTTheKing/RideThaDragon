@@ -223,6 +223,9 @@ public class V10Dragon extends EntityEnderDragon{
             loc = new Location(w, myX, myY, myZ);
             Block b = loc.getBlock();
             if (plugin.stopGrief.contains(wn) && b != null && b.getType() != Material.AIR && !b.isLiquid()) {
+                p.setFlying(false);
+                p.eject();
+                plugin.killIt(player);
                 return;
             }
         }
